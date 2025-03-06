@@ -4,7 +4,7 @@ import p5 from 'p5'
 import waves from './waves.jsx'
 import getRandomColor from './getRandomColor'
 import loadPoem from './loadPoem.js'
-import { INTERVAL_OPTIONS } from './config'
+import { INTERVAL_OPTIONS, FONT_OPTIONS } from './config'
 
 // 状态管理
 const poemData =  reactive({
@@ -15,7 +15,8 @@ const poemData =  reactive({
 const wallpaperParams = reactive({
   waveColor: '',
   isDarkMode: true,
-  changeInterval: 60
+  changeInterval: 60,
+  fontFamily: 'JXZhuoKai'
 })
 
 let p5Instance = null
@@ -30,6 +31,7 @@ const wallpaperMethods = {
       wallpaperParams.changeInterval = settings.changeInterval
       wallpaperParams.isDarkMode = settings.isDarkMode
       wallpaperParams.waveColor = settings.waveColor
+      wallpaperParams.fontFamily = settings.fontFamily || 'JXZhuoKai'
     }
   },
   // 保存设置到本地存储
@@ -40,7 +42,8 @@ const wallpaperMethods = {
       waveColor: wallpaperParams.waveColor ? {
         name: wallpaperParams.waveColor.name,
         color: wallpaperParams.waveColor.color
-      } : null
+      } : null,
+      fontFamily: wallpaperParams.fontFamily
     })
   },
   // 获取诗词
@@ -110,6 +113,13 @@ const changeMethods = {
       wallpaperMethods.stopAutoChange()
     }
     wallpaperMethods.saveSettings()
+  },
+
+  // 更换字体
+  onChangeFont (value) {
+    wallpaperParams.fontFamily = value
+    wallpaperMethods.saveSettings()
+    updateP5Instance()
   }
 }
 
@@ -123,7 +133,8 @@ function updateP5Instance () {
   p5Instance.updateWithProps({
     isDarkMode: wallpaperParams.isDarkMode,
     waveColor: wallpaperParams.waveColor,
-    poem: poemData
+    poem: poemData,
+    fontFamily: wallpaperParams.fontFamily
   })
 }
 
@@ -215,21 +226,37 @@ onUnmounted(() => {
 <template>
   <div class="wallpaper">
     <div class="settings">
-      <button class="set-button refresh-button" @click="wallpaperMethods.fetchPoem">诗词切换</button>
-      <button class="set-button refresh-button" @click="changeMethods.onChangeWavecolor">颜色切换</button>
-      <button class="set-button" @click="changeMethods.onChangeTheme">{{ wallpaperParams.isDarkMode ? '更换浅色背景' : '更换深色背景' }}</button>
-      <button class="set-button" @click="setWallpaper">设置为电脑壁纸</button>
-      <div class="interval-setting">
-        自动更换壁纸间隔：
-        <select
-          :value="wallpaperParams.changeInterval"
-          @change="e => changeMethods.onChangeInterval(Number(e.target.value))"
-          class="interval-select"
-        >
-          <option v-for="option in INTERVAL_OPTIONS" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+      <div class="button-group">
+        <button class="set-button refresh-button" @click="wallpaperMethods.fetchPoem">诗词切换</button>
+        <button class="set-button refresh-button" @click="changeMethods.onChangeWavecolor">颜色切换</button>
+        <button class="set-button" @click="changeMethods.onChangeTheme">{{ wallpaperParams.isDarkMode ? '更换浅色背景' : '更换深色背景' }}</button>
+        <button class="set-button" @click="setWallpaper">设置为电脑壁纸</button>
+      </div>
+      <div class="select-group">
+        <div class="interval-setting">
+          自动更换壁纸间隔：
+          <select
+            :value="wallpaperParams.changeInterval"
+            @change="e => changeMethods.onChangeInterval(Number(e.target.value))"
+            class="interval-select"
+          >
+            <option v-for="option in INTERVAL_OPTIONS" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        <div class="interval-setting">
+          壁纸字体：
+          <select
+            :value="wallpaperParams.fontFamily"
+            @change="e => changeMethods.onChangeFont(e.target.value)"
+            class="interval-select"
+          >
+            <option v-for="option in FONT_OPTIONS" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="preview" :style="{ backgroundColor: wallpaperParams.isDarkMode ? '#323232' : '#e6e6e6' }">
@@ -248,16 +275,25 @@ onUnmounted(() => {
 
 .settings {
   display: flex;
-  gap: 10px;
   margin-bottom: 14px;
   justify-content: space-between;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.select-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
 .interval-setting {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-left: auto;
+  white-space: nowrap;
 }
 
 .set-button {
@@ -281,19 +317,6 @@ onUnmounted(() => {
   background-color: #4a4a4a;
   color: white;
   cursor: pointer;
-}
-
-.interval-input {
-  width: 60px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #4a4a4a;
-  color: white;
-}
-
-.interval-label {
-  color: #fff;
 }
 
 .preview {

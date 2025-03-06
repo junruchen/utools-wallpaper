@@ -86,6 +86,7 @@ export default function waves(p) {
   let isDarkMode = true;
   let waveColor = COLORS.DEFAULT_WAVE;
   let waveColorName = COLORS.DEFAULT_WAVE_NAME;
+  let fontFamily = 'JXZhuoKai';
   let poem = {
     content: '',
     author: '',
@@ -109,7 +110,7 @@ export default function waves(p) {
   p.draw = function () {
     p.background(bgColor);
     
-    p.textFont('JXZhuoKai');
+    p.textFont(fontFamily);
     if (waveColorName) {
       // 渲染颜色文字（竖向排列）
       p.textAlign(p.RIGHT, p.TOP);
@@ -201,6 +202,7 @@ export default function waves(p) {
     waveColorName = newProps.waveColor.name;
     isDarkMode = newProps.isDarkMode;
     poem = newProps.poem;
+    fontFamily = newProps.fontFamily || 'JXZhuoKai';
     mountains = [];
     growMountains(p, mountains, waveColor);
     p.draw();
@@ -217,7 +219,7 @@ export default function waves(p) {
           const canvas = p.createCanvas(screenWidth, screenHeight);
           p.pixelDensity(window.devicePixelRatio || 1);
           p.background(bgColor);
-          p.textFont('JXZhuoKai');
+          p.textFont(fontFamily);
           
           // 重新生成山脉
           const tempMountains = [];

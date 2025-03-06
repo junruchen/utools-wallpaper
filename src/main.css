@@ -3,6 +3,36 @@
   src: url('./fonts/JXZhuoKai.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'XinYiJiXiangSong';
+  src: url('./fonts/Fontquan-XinYiJiXiangSong-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Wencang';
+  src: url('./fonts/Wencang.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Zhi-Mang-Xing';
+  src: url('./fonts/Zhi-Mang-Xing.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'QIJIFALLBACK';
+  src: url('./fonts/QIJIFALLBACK.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'GenWanMinTW';
+  src: url('./fonts/GenWanMinTW-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'ZCOOL-QingKe-HuangYou';
+  src: url('./fonts/ZCOOL-QingKe-HuangYou.woff') format('woff');
+}
+
 :root {
   --blue: rgb(88, 164, 246);
   --light: #fff;
