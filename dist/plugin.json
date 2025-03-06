@@ -1,0 +1,24 @@
+{
+  "main": "index.html",
+  "preload": "preload/services.js",
+  "logo": "logo.png",
+  "description": "一款融合水波纹动效与古诗词的精美壁纸插件。支持明暗主题切换，可选传统雅致配色，提供一键设置和定时更换功能，让你的桌面充满诗意与韵味。",
+  "features": [
+    {
+      "code": "wallpaper",
+      "explain": "设置系统壁纸",
+      "cmds": [
+        "壁纸",
+        "更换壁纸",
+        "设置壁纸",
+        {
+          "type": "files",
+          "fileType": "file",
+          "match": "/\\.(jpg|jpeg|png|gif|bmp)$/i",
+          "maxLength": 1,
+          "label": "设置为壁纸"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "type": "commonjs",
+  "dependencies": {
+    "gifwrap": "^0.10.1"
+  }
+}
