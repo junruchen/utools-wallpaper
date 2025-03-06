@@ -66,16 +66,19 @@ window.services = {
         command = `osascript -e 'tell application "System Events" to tell every desktop to set picture to "${imagePath}"'`
       } else if (platform === 'win32') {
         // Windows
-        command = `powershell.exe -command "$setwallpapersrc = @'
-          using System.Runtime.InteropServices;
-          public class Wallpaper {
-            [DllImport('user32.dll', CharSet=CharSet.Auto)]
-            public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
-          }
+        console.log('[DEBUG] 获取壁纸路径:', imagePath);
+        command = `powershell -Command "
+Add-Type @'
+using System.Runtime.InteropServices;
+public class Wallpaper {
+    [DllImport(""user32.dll"", CharSet=CharSet.Auto)]
+    public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+}
 '@
-          Add-Type -TypeDefinition $setwallpapersrc
-          [Wallpaper]::SystemParametersInfo(0x0014, 0, '${imagePath}', 0x01 -bor 0x02)"`
-      } else {
+[Wallpaper]::SystemParametersInfo(0x0014, 0, '${imagePath}', 0x01 -bor 0x02)
+"`;
+        console.log('[DEBUG] 设置壁纸命令:', command);
+      } else if (platform === 'linux') {
         // Linux (支持 GNOME 和 KDE)
         command = `if [ $(which gsettings) ]; then
           gsettings set org.gnome.desktop.background picture-uri-dark 'file://${imagePath}'
@@ -83,6 +86,8 @@ window.services = {
         elif [ $(which plasma-apply-wallpaperimage) ]; then
           plasma-apply-wallpaperimage '${imagePath}'
         fi`
+      } else {
+        reject(new Error('不支持的操作系统'))
       }
       
       exec(command, (error) => {
