@@ -6,6 +6,17 @@ export const INTERVAL_OPTIONS = [
   { label: '每月', value: 43200 },
 ]
 
+// 可用字体选项
+export const FONT_OPTIONS = [
+  { label: '江西拙楷', value: 'JXZhuoKai' },
+  { label: '欣意吉祥宋', value: 'XinYiJiXiangSong' },
+  { label: '问藏书房', value: 'Wencang' },
+  { label: '钟齐志莽行书', value: 'Zhi-Mang-Xing' },
+  { label: '黄令东齐伋体', value: 'QIJIFALLBACK' },
+  { label: '源云明体', value: 'GenWanMinTW' },
+  { label: '站酷庆科黄油体', value: 'ZCOOL-QingKe-HuangYou' },
+]
+
 // 诗词列表，当接口出现问题时，使用
 export const  DEFAULT_POEM_ARRAY = [
   {
