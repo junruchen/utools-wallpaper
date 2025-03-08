@@ -94,48 +94,64 @@ export default function waves(p) {
     title: ''
   };
 
-    // 添加字体加载状态跟踪
-    const fontLoadStatus = {};
+  // 添加字体加载状态跟踪
+  const fontLoadStatus = {};
   
-    // 添加延迟预加载字体的函数
-    const preloadFonts = () => {
-      // 使用 setTimeout 延迟加载字体
+  // 添加字体预加载函数
+  const preloadFont = (font) => {
+    return new Promise((resolve) => {
+      // 如果字体已加载，则直接返回
+      if (fontLoadStatus[font] === 'loaded') {
+        resolve();
+        return;
+      }
+      
+      // 标记字体为正在加载
+      fontLoadStatus[font] = 'loading';
+      
+      // 创建一个隐藏的元素来触发字体加载
+      const preloadDiv = document.createElement('div');
+      preloadDiv.style.fontFamily = font;
+      preloadDiv.style.position = 'absolute';
+      preloadDiv.style.left = '-9999px';
+      preloadDiv.style.visibility = 'hidden';
+      preloadDiv.textContent = '预加载字体';
+      document.body.appendChild(preloadDiv);
+      
+      // 一段时间后移除元素并标记为已加载
       setTimeout(() => {
-        console.log('开始延迟预加载字体...');
-        // 从配置中获取字体列表
-        const fonts = FONT_OPTIONS.map(option => option.value);
+        if (document.body.contains(preloadDiv)) {
+          document.body.removeChild(preloadDiv);
+        }
+        fontLoadStatus[font] = 'loaded';
+        console.log(`字体 ${font} 加载完成`);
+        resolve();
+      }, 500);
+    });
+  };
+
+  // 添加延迟预加载所有字体的函数
+  const preloadAllFonts = async () => {
+    console.log('开始预加载所有字体...');
+    // 从配置中获取字体列表
+    const fonts = FONT_OPTIONS.map(option => option.value);
+    
+    // 先预加载当前字体，确保首次渲染正确
+    await preloadFont(fontFamily);
+    
+    // 然后异步加载其他字体
+    setTimeout(() => {
+      fonts.forEach((font, index) => {
+        // 跳过已加载的当前字体
+        if (font === fontFamily || fontLoadStatus[font] === 'loaded') return;
         
-        // 逐个加载字体
-        fonts.forEach((font, index) => {
-          // 如果字体已加载，则跳过
-          if (fontLoadStatus[font]) return;
-          
-          // 标记字体为正在加载
-          fontLoadStatus[font] = 'loading';
-          
-          // 错开加载时间，避免同时加载多个字体
-          setTimeout(() => {
-            // 创建一个隐藏的元素来触发字体加载
-            const preloadDiv = document.createElement('div');
-            preloadDiv.style.fontFamily = font;
-            preloadDiv.style.position = 'absolute';
-            preloadDiv.style.left = '-9999px';
-            preloadDiv.style.visibility = 'hidden';
-            preloadDiv.textContent = '预加载字体';
-            document.body.appendChild(preloadDiv);
-            
-            // 一段时间后移除元素并标记为已加载
-            setTimeout(() => {
-              if (document.body.contains(preloadDiv)) {
-                document.body.removeChild(preloadDiv);
-              }
-              fontLoadStatus[font] = 'loaded';
-              console.log(`字体 ${font} 加载完成`);
-            }, 500);
-          }, index * 200); // 每个字体错开200ms加载
-        });
-      }, 1000); // 页面加载完成1秒后开始预加载
-    };
+        // 错开加载时间，避免同时加载多个字体
+        setTimeout(() => {
+          preloadFont(font);
+        }, index * 200); // 每个字体错开200ms加载
+      });
+    }, 1000);
+  };
 
   p.setup = function () {
     const container = document.getElementById('waves-container');
@@ -150,14 +166,25 @@ export default function waves(p) {
     p.background(bgColor);
     mountains.forEach((m) => m.display(p));
 
-    // 调用延迟预加载字体函数
-    preloadFonts();
+    // 预加载当前字体和其他字体
+    preloadAllFonts();
   };
 
   p.draw = function () {
     p.background(bgColor);
     
-    p.textFont(fontFamily);
+    // 检查当前字体是否已加载，如果未加载则使用默认字体
+    if (fontLoadStatus[fontFamily] === 'loaded') {
+      p.textFont(fontFamily);
+    } else {
+      // 如果字体尚未加载完成，使用系统默认字体
+      p.textFont('sans-serif');
+      // 尝试加载字体
+      if (!fontLoadStatus[fontFamily]) {
+        preloadFont(fontFamily);
+      }
+    }
+
     if (waveColorName) {
       // 渲染颜色文字（竖向排列）
       p.textAlign(p.RIGHT, p.TOP);
@@ -258,25 +285,10 @@ export default function waves(p) {
     // 如果字体变化且尚未加载完成，立即加载
     if (fontChanged && fontLoadStatus[fontFamily] !== 'loaded') {
       console.log(`字体 ${fontFamily} 尚未加载完成，正在加载...`);
-      
-      // 创建一个隐藏的元素来触发字体加载
-      const preloadDiv = document.createElement('div');
-      preloadDiv.style.fontFamily = fontFamily;
-      preloadDiv.style.position = 'absolute';
-      preloadDiv.style.left = '-9999px';
-      preloadDiv.style.visibility = 'hidden';
-      preloadDiv.textContent = '加载字体';
-      document.body.appendChild(preloadDiv);
-      
-      // 标记字体为已加载
-      fontLoadStatus[fontFamily] = 'loaded';
-      
-      // 一段时间后移除元素
-      setTimeout(() => {
-        if (document.body.contains(preloadDiv)) {
-          document.body.removeChild(preloadDiv);
-        }
-      }, 500);
+      preloadFont(fontFamily).then(() => {
+        // 字体加载完成后重新绘制
+        p.draw();
+      });
     }
 
     mountains = [];
