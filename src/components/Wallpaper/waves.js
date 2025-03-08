@@ -1,4 +1,5 @@
 import p5 from 'p5'
+import { FONT_OPTIONS } from './config.js'  // 导入字体配置
 
 // 提取常量配置
 const WAVE_CONFIG = {
@@ -13,13 +14,13 @@ const WAVE_CONFIG = {
 
 const TEXT_CONFIG = {
   COLOR_SIZE: 150,
-  POEM_SIZE: 28,
-  TITLE_SIZE: 16,
-  AUTHOR_SIZE: 12,
+  POEM_SIZE: 40,
+  TITLE_SIZE: 20,
+  AUTHOR_SIZE: 14,
   PADDING_LEFT: 15,
-  AUTHOR_PADDING: 4,
+  AUTHOR_PADDING: 3,
   POEM_Y_RATIO: 0.25,
-  AUTHOR_Y_OFFSET: 30,
+  AUTHOR_Y_OFFSET: 35,
   AUTHOR_BG_RADIUS: 3,
   AUTHOR_BG_HEIGHT: 22
 };
@@ -93,6 +94,49 @@ export default function waves(p) {
     title: ''
   };
 
+    // 添加字体加载状态跟踪
+    const fontLoadStatus = {};
+  
+    // 添加延迟预加载字体的函数
+    const preloadFonts = () => {
+      // 使用 setTimeout 延迟加载字体
+      setTimeout(() => {
+        console.log('开始延迟预加载字体...');
+        // 从配置中获取字体列表
+        const fonts = FONT_OPTIONS.map(option => option.value);
+        
+        // 逐个加载字体
+        fonts.forEach((font, index) => {
+          // 如果字体已加载，则跳过
+          if (fontLoadStatus[font]) return;
+          
+          // 标记字体为正在加载
+          fontLoadStatus[font] = 'loading';
+          
+          // 错开加载时间，避免同时加载多个字体
+          setTimeout(() => {
+            // 创建一个隐藏的元素来触发字体加载
+            const preloadDiv = document.createElement('div');
+            preloadDiv.style.fontFamily = font;
+            preloadDiv.style.position = 'absolute';
+            preloadDiv.style.left = '-9999px';
+            preloadDiv.style.visibility = 'hidden';
+            preloadDiv.textContent = '预加载字体';
+            document.body.appendChild(preloadDiv);
+            
+            // 一段时间后移除元素并标记为已加载
+            setTimeout(() => {
+              if (document.body.contains(preloadDiv)) {
+                document.body.removeChild(preloadDiv);
+              }
+              fontLoadStatus[font] = 'loaded';
+              console.log(`字体 ${font} 加载完成`);
+            }, 500);
+          }, index * 200); // 每个字体错开200ms加载
+        });
+      }, 1000); // 页面加载完成1秒后开始预加载
+    };
+
   p.setup = function () {
     const container = document.getElementById('waves-container');
     const containerWidth = container.offsetWidth;
@@ -105,6 +149,9 @@ export default function waves(p) {
     growMountains(p, mountains, waveColor);
     p.background(bgColor);
     mountains.forEach((m) => m.display(p));
+
+    // 调用延迟预加载字体函数
+    preloadFonts();
   };
 
   p.draw = function () {
@@ -202,7 +249,36 @@ export default function waves(p) {
     waveColorName = newProps.waveColor.name;
     isDarkMode = newProps.isDarkMode;
     poem = newProps.poem;
-    fontFamily = newProps.fontFamily || 'JXZhuoKai';
+
+    // 检查字体是否变化
+    const newFontFamily = newProps.fontFamily || 'JXZhuoKai';
+    const fontChanged = fontFamily !== newFontFamily;
+    fontFamily = newFontFamily;
+    
+    // 如果字体变化且尚未加载完成，立即加载
+    if (fontChanged && fontLoadStatus[fontFamily] !== 'loaded') {
+      console.log(`字体 ${fontFamily} 尚未加载完成，正在加载...`);
+      
+      // 创建一个隐藏的元素来触发字体加载
+      const preloadDiv = document.createElement('div');
+      preloadDiv.style.fontFamily = fontFamily;
+      preloadDiv.style.position = 'absolute';
+      preloadDiv.style.left = '-9999px';
+      preloadDiv.style.visibility = 'hidden';
+      preloadDiv.textContent = '加载字体';
+      document.body.appendChild(preloadDiv);
+      
+      // 标记字体为已加载
+      fontLoadStatus[fontFamily] = 'loaded';
+      
+      // 一段时间后移除元素
+      setTimeout(() => {
+        if (document.body.contains(preloadDiv)) {
+          document.body.removeChild(preloadDiv);
+        }
+      }, 500);
+    }
+
     mountains = [];
     growMountains(p, mountains, waveColor);
     p.draw();
