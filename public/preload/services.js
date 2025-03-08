@@ -66,18 +66,14 @@ window.services = {
         command = `osascript -e 'tell application "System Events" to tell every desktop to set picture to "${imagePath}"'`
       } else if (platform === 'win32') {
         // Windows
-        console.log('[DEBUG] 获取壁纸路径:', imagePath);
-        command = `powershell -Command "
-Add-Type @'
-using System.Runtime.InteropServices;
-public class Wallpaper {
-    [DllImport(""user32.dll"", CharSet=CharSet.Auto)]
-    public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
-}
-'@
-[Wallpaper]::SystemParametersInfo(0x0014, 0, '${imagePath}', 0x01 -bor 0x02)
-"`;
-        console.log('[DEBUG] 设置壁纸命令:', command);
+        // console.log('[DEBUG] 获取壁纸路径:', imagePath);
+        // 获取 setWallpaper.cs 文件的绝对路径
+        const scriptPath = path.join(__dirname, 'setWallpaper.cs');
+        // 确保路径使用正确的格式
+        //const normalizedPath = imagePath.replace(/\\/g, '\\\\');
+        // 使用 setWallpaper.cs 程序设置壁纸
+        command = `powershell -ExecutionPolicy Bypass -NoProfile -Command "Add-Type -Path '${scriptPath}'; [Wallpaper.Setter]::SetWallpaper('${imagePath}')"`;
+        // console.log('[DEBUG] 设置壁纸命令:', command);
       } else if (platform === 'linux') {
         // Linux (支持 GNOME 和 KDE)
         command = `if [ $(which gsettings) ]; then
@@ -88,12 +84,21 @@ public class Wallpaper {
         fi`
       } else {
         reject(new Error('不支持的操作系统'))
+        return;
       }
       
-      exec(command, (error) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
-          reject(error)
+          console.error('[DEBUG] 执行命令失败:', error);
+          console.error('[DEBUG] stderr:', stderr);
+          window.utools.showNotification(error.message);
+          reject(new Error(`设置壁纸失败: ${error.message}`))
         } else {
+          //console.log('[DEBUG] 命令执行成功, stdout:', stdout);
+          if (stderr) {
+            console.warn('[DEBUG] stderr (NO ERROR):', stderr);
+            window.utools.showNotification(stderr)
+          }
           resolve(true)
         }
       })
