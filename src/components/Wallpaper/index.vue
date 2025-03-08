@@ -140,7 +140,7 @@ function updateP5Instance () {
 
 // 设置电脑壁纸
 async function setWallpaper () {
-  console.log('[DEBUG] Vue 组件 setWallpaper 方法开始执行');
+  //console.log('[DEBUG] Vue 组件 setWallpaper 方法开始执行');
   try {
     // 确保字体加载完成
     //console.log('[DEBUG] 等待字体加载完成...');
@@ -166,10 +166,10 @@ async function setWallpaper () {
     //console.log('[DEBUG] 壁纸图片保存成功，路径:', imagePath);
     
     // 设置壁纸
-    console.log('[DEBUG] 开始设置壁纸...');
+    //console.log('[DEBUG] 开始设置壁纸...');
     try {
       await window.services.setWallpaper(imagePath)
-      console.log('[DEBUG] 壁纸设置成功');
+      //console.log('[DEBUG] 壁纸设置成功');
     } catch (wallpaperError) {
       console.error('[DEBUG] 设置壁纸失败:', wallpaperError);
       throw wallpaperError;
@@ -183,7 +183,7 @@ async function setWallpaper () {
     // } catch (deleteError) {
     //   console.error('[DEBUG] 删除临时文件失败：', deleteError)
     // }
-    console.log('[DEBUG] setWallpaper 方法执行完成');
+    //console.log('[DEBUG] setWallpaper 方法执行完成');
     
     window.utools.showNotification('壁纸设置成功')
   } catch (error) {
