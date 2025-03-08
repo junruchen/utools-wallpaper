@@ -3,7 +3,7 @@ import p5 from 'p5'
 // 提取常量配置
 const WAVE_CONFIG = {
   NOISE_DETAIL: { SCALE: 3, FALLOFF: 1.4 },
-  WAVE_COUNT: 4,
+  WAVE_COUNT: 5,
   ALPHA_STEP: 50,
   HEIGHT_STEP: 35,
   VERTEX_STEP: 6,

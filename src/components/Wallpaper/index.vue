@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import p5 from 'p5'
-import waves from './waves.jsx'
+import waves from './waves.js'
 import getRandomColor from './getRandomColor'
 import loadPoem from './loadPoem.js'
 import { INTERVAL_OPTIONS, FONT_OPTIONS } from './config'
